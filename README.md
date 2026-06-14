@@ -1,31 +1,35 @@
-# Mind Injection: Focus & Mastery System
+# 🧠 Mind Injection: Focus and Memory System
 
-**Mind Injection** is an advanced cognitive training and text-memorization tool designed to combat digital distraction and cement knowledge through structured, high-intensity focus sessions. 
+> **"Where repetition meets focus, mastery becomes inevitable."**
 
-Where repetition meets focus, mastery becomes inevitable.
-
----
-
-## 🧠 Core Philosophy & Scientific Approach
-
-The system employs a unique **3-Stage Spaced Repetition** protocol combined with a custom **Diminishing Cycles** algorithm to transform passive reading into active, deep-level cognitive encoding:
-
-1. **Stage 1 (Initial Injection):** Focused review with real-time sensory and emotional text engagement.
-2. **Stage 2 (24-Hour Reinforcement):** Review session triggered exactly 24 hours later to interrupt the psychological forgetting curve.
-3. **Stage 3 (7-Day Consolidation):** Final session after one week to lock the data into long-term memory.
+**Mind Injection** is a powerful cognitive tool designed to combat digital distraction and facilitate deep text memorization. By combining high-intensity focus with structured, scientifically timed study sessions, it ensures information is successfully transferred into long-term memory.
 
 ---
 
-## 🛠️ Key Features
+## ⏳ How It Works (The 3-Stage Protocol)
 
-* **Diminishing Cycles Engine:** Automatically breaks down target texts into fading structural patterns, forcing active neurological recall.
-* **Cognitive Focus Testing:** After every diminishing cycle, the user must pass an immediate focus test based on the text's core structure to continue.
-* **Scheduled Session Architecture:** The primary text files are saved externally under unique, structured filenames, making them easily retrievable for precisely scheduled reviews.
-* **Anti-Distraction Shield:** Implements aggressive audio-visual anti-distraction mechanisms, forcing constant sensory interaction and cognitive immersion.
+The system breaks down the learning process into three strategically spaced intervals to interrupt the brain's natural forgetting curve:
+
+| Stage        | Timing            | Purpose & Mechanism |
+|              |                   | |
+| **Stage 1**  | *First Session*   | Initial Injection:** Careful reading while actively engaging sensory and emotional faculties. |
+| **Stage 2**  | *After 24 Hours*   | Reinforcement:** Reviewing the text exactly one day later to arrest early memory decay. |
+| **Stage 3**  | *After 7 Days*     | **Consolidation:** One final scheduled review to permanently lock the data into long-term storage. |
+
+---
+
+## 🛠️ Main Features
+
+* **📉 Diminishing Cycles Engine:** Automatically and progressively fades out structural segments of the text, forcing the brain into active neurological recall.
+* **🛡️ Anti-Distraction Shield:** Implements aggressive audio-visual lockdown mechanisms to eliminate desktop ambient distractions and anchor your absolute attention.
+* **🧪 Cognitive Focus Tests:** Integrated structural checkpoints at the end of each cycle; users must demonstrate focus to unlock subsequent phases.
+* **📂 Structured Session Files:** Saves external text sources using a strict, unique naming convention for seamless retrieval during automated scheduling.
 
 ---
 
 ## 💻 Tech Stack
 
 * **Language:** C# (.NET)
-* **API/Libraries:** Win32 API (`user32.dll`, `kernel32.dll`) for desktop window locking, Windows Speech Synthesis for cognitive audio reinforcement.
+* **APIs & Libraries:** 
+  * `Win32 API` (`user32.dll` / `kernel32.dll`) for advanced desktop application window manipulation and distraction locking.
+  * `Windows Speech Synthesis` for multi-sensory audio reinforcement during cognitive training.
