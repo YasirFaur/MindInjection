@@ -9,6 +9,8 @@ namespace injection
 {
     public class TextManager
     {
+        DataBaseManager dbm = new DataBaseManager();
+
         SpeechSynthesizer synth = new SpeechSynthesizer();
         public static bool is_reading { get; private set; }
         public TextManager()
@@ -112,6 +114,7 @@ namespace injection
                 }
 
             }
+            dbm.save_session(string.Join(Environment.NewLine, sentence_list));
             return sentence_list;
         }
 

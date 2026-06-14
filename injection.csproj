@@ -52,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBaseManager.cs" />
     <Compile Include="FocusMonitor.cs" />
     <Compile Include="TextManager.cs" />
     <Compile Include="Program.cs" />
