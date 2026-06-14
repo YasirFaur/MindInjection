@@ -35,3 +35,6 @@ After 7 Days: One final scheduled review to permanently lock the data into long-
 * **APIs & Libraries:** 
   * `Win32 API` (`user32.dll` / `kernel32.dll`) for advanced desktop application window manipulation and distraction locking.
   * `Windows Speech Synthesis` for multi-sensory audio reinforcement during cognitive training.
+
+  ## 📺 Watch the Demo
+See how **MindInjection** works in action on YouTube: [Watch Video Demo](https://youtu.be/Ltnjj40d3G8)
