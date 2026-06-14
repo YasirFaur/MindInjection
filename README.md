@@ -9,12 +9,14 @@
 ## ⏳ How It Works (The 3-Stage Protocol)
 
 The system breaks down the learning process into three strategically spaced intervals to interrupt the brain's natural forgetting curve:
+Stage 1
+First Session: Initial Injection:** Careful reading while actively engaging sensory and emotional faculties.
 
-| Stage        | Timing            | Purpose & Mechanism |
-|              |                   | |
-| **Stage 1**  | *First Session*   | Initial Injection:** Careful reading while actively engaging sensory and emotional faculties. |
-| **Stage 2**  | *After 24 Hours*   | Reinforcement:** Reviewing the text exactly one day later to arrest early memory decay. |
-| **Stage 3**  | *After 7 Days*     | **Consolidation:** One final scheduled review to permanently lock the data into long-term storage. |
+Stage 2
+After 24 Hours: Reviewing the text exactly one day later to arrest early memory decay.
+
+Stage 3
+After 7 Days: One final scheduled review to permanently lock the data into long-term storage. |
 
 ---
 
