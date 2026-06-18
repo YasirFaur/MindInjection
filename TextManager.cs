@@ -234,7 +234,7 @@ namespace injection
             double totale_seconds = text.Length * 0.45;
             return TimeSpan.FromSeconds(totale_seconds);
         }
-
+        
         public string estimated_time()
         {
             TimeSpan estimated = calculate_estimated_time(input_text);
@@ -247,6 +247,17 @@ namespace injection
             double totale_seconds = text.Length * 0.076;
 
             return TimeSpan.FromSeconds(totale_seconds).ToString(@"hh\:mm\:ss");
+        }
+
+        //calculate the remaining time based on the fading text length.
+        public string calculate_remaining_time(string current_cycle_text)
+        {
+            if (string.IsNullOrEmpty(current_cycle_text) || 
+                string.IsNullOrEmpty(input_text)) return "00:00:00";
+            //the remaining time is directly linked to the size of the text left to process, we use the same formula as the estimated time but with the current cycle text length
+
+            double remaining_seconds = current_cycle_text.Length * 0.45;
+            return TimeSpan.FromSeconds(remaining_seconds).ToString(@"hh\:mm\:ss");
         }
 
         // Import Windows API to enable ANSI colors

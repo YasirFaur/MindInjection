@@ -22,6 +22,7 @@ namespace injection
         static void Main(string[] args)
         {
             TextManager.EnableAnsiColors();
+
             Console.Title = "MindInjection - Focus & Mastery System";
             FocusMonitor.MaximizeAndLockConsole();
             FocusMonitor.StartMonitoring();
@@ -117,13 +118,15 @@ namespace injection
                 int current_lenght = cycles[i].Replace("\t", "").Replace("\r\n", "").Length;
                 double percentage = total_length > 0 ? 1 - ((double)current_lenght / total_length) : 0;
                 percentage *= 100;
+                
 
                 Console.WriteLine(
-                    "\t|| " + "Total Injection Time: " + totale_injection_time +
+                    "\t|| " + "Total Injection Time:   " + totale_injection_time +
                     " || " + "Current Cycle Time: " + current_cycle_time +
                     " || " + (int)percentage +
                     "% " + TextManager.GetProgressBar((int)percentage) +
-                    " || " + Environment.NewLine);
+                    " || " + Environment.NewLine + 
+                    "\t|| " + "Remainig Injectin time: " + manager.calculate_remaining_time(cycles[i]) + Environment.NewLine);
 
                 manager.print_cycle_with_highlight(cycles[i]);
                 manager.speak_text(cycles[i]);
