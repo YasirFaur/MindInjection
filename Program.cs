@@ -21,6 +21,7 @@ namespace injection
 
         static void Main(string[] args)
         {
+            TextManager.EnableAnsiColors();
             Console.Title = "MindInjection - Focus & Mastery System";
             FocusMonitor.MaximizeAndLockConsole();
             FocusMonitor.StartMonitoring();
@@ -62,7 +63,7 @@ namespace injection
                 {
                     switch (TextManager.input_text.Trim())
                     {
-                        case "0":
+                        case "0":                            
                             return; 
                         case "2":
                             view();
@@ -82,62 +83,76 @@ namespace injection
                 // check if the text length is valid 
                 if (manager.is_length_valid())
                 {
-                    List<string> sentences = manager.split_text_into_sentences();
-                    List<string> cycles = manager.generate_diminishing_cycles(sentences);
-
-                    for (int i = 0; i < cycles.Count; i++)
-                    {
-                        Console.Clear();
-                        string totale_injection_time = manager.estimated_time();
-                        string current_cycle_time = manager.calculate_current_cycle_time(cycles[i]);
-
-                        int total_length = TextManager.input_text.Replace("\r\n", "").Length;
-                        int current_lenght = cycles[i].Replace("\t", "").Replace("\r\n", "").Length;
-                        double percentage = total_length > 0 ? 1 - ((double)current_lenght / total_length) : 0;
-                        percentage *= 100;
-
-                        Console.WriteLine(
-                            "\t|| " + "Total Injection Time: " + totale_injection_time +
-                            " || " + "Current Cycle Time: " + current_cycle_time +
-                            " || " + (int)percentage +
-                            "% " + TextManager.GetProgressBar((int)percentage) +
-                            " || " + Environment.NewLine);
-
-                        manager.print_cycle_with_highlight(cycles[i]);
-                        manager.speak_text(cycles[i]);
-
-                        string test_word = manager.longest_word.ToLower();
-
-                        while (true)
-                        {
-                            manager.print_ascii_art(test_word);
-                            Console.WriteLine(Environment.NewLine);
-
-                            TextManager.set_speaking_status(true);
-                            manager.speak_text_async("type! " + manager.longest_word);
-
-                            string user_input = Console.ReadLine()?.Trim().ToLower();
-                            TextManager.set_speaking_status(false);
-
-                            if (user_input == test_word)
-                            {
-                                break;
-                            }
-                            Console.Clear();
-                        }
-                    }
-                    
-                    Console.Clear();
-                    Console.WriteLine("\n[Process Finished. Returning to Main Menu...]");
-                    Thread.Sleep(2000);
-                    return;
+                    inject(manager.split_text_into_sentences());                    
                 }
                 else
                 {
-                    Console.WriteLine("\n[error] invalid text length. try again");
-                    Thread.Sleep(2000);
+                    if (TextManager.input_text.Length < 256)
+                    {
+                        Console.WriteLine("Error: The text is too short.");
+                        Thread.Sleep(2000);
+
+                    }
+                    else if (TextManager.input_text.Length > 1024)
+                    {
+                        TextManager.input_text = manager.GetTheFirst1024Characters(TextManager.input_text);
+                        inject(manager.split_text_into_sentences());
+
+                    }                    
                 }
             }
+        }
+
+        private static void inject(List<string> splited_text_into_sentences)
+        {
+            List<string> cycles = manager.generate_diminishing_cycles(splited_text_into_sentences);
+
+            for (int i = 0; i < cycles.Count; i++)
+            {
+                Console.Clear();
+                string totale_injection_time = manager.estimated_time();
+                string current_cycle_time = manager.calculate_current_cycle_time(cycles[i]);
+
+                int total_length = TextManager.input_text.Replace("\r\n", "").Length;
+                int current_lenght = cycles[i].Replace("\t", "").Replace("\r\n", "").Length;
+                double percentage = total_length > 0 ? 1 - ((double)current_lenght / total_length) : 0;
+                percentage *= 100;
+
+                Console.WriteLine(
+                    "\t|| " + "Total Injection Time: " + totale_injection_time +
+                    " || " + "Current Cycle Time: " + current_cycle_time +
+                    " || " + (int)percentage +
+                    "% " + TextManager.GetProgressBar((int)percentage) +
+                    " || " + Environment.NewLine);
+
+                manager.print_cycle_with_highlight(cycles[i]);
+                manager.speak_text(cycles[i]);
+
+                string test_word = manager.longest_word.ToLower();
+
+                while (true)
+                {
+                    manager.print_ascii_art(test_word);
+                    Console.WriteLine(Environment.NewLine);
+
+                    TextManager.set_speaking_status(true);
+                    manager.speak_text_async("type! " + manager.longest_word);
+
+                    string user_input = Console.ReadLine()?.Trim().ToLower();
+                    TextManager.set_speaking_status(false);
+
+                    if (user_input == test_word)
+                    {
+                        break;
+                    }
+                    Console.Clear();
+                }
+            }
+
+            Console.Clear();
+            Console.WriteLine("\n[Process Finished. Returning to Main Menu...]");
+            Thread.Sleep(2000);
+            return;
         }
 
         private static void view()

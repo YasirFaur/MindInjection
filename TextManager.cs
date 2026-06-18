@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
 using System.Text;
+using System.Threading;
 using WenceyWang.FIGlet;
 namespace injection
 {
@@ -35,7 +37,7 @@ namespace injection
 
         //these constants set the minimum and maximum text length
         //we use constants so we can change the limits easily in the future
-        private const int MIN_LENGTH = 366;
+        private const int MIN_LENGTH = 256;
         private const int MAX_LENGTH = 1024;
 
         public string longest_word = "";
@@ -247,6 +249,24 @@ namespace injection
             return TimeSpan.FromSeconds(totale_seconds).ToString(@"hh\:mm\:ss");
         }
 
+        // Import Windows API to enable ANSI colors
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetStdHandle(int nStdHandle);
+
+        public static void EnableAnsiColors()
+        {
+            // Get Standard Output Handle
+            var handle = GetStdHandle(-11);
+            // Get current console mode
+            GetConsoleMode(handle, out uint mode);
+            // Enable virtual terminal processing (0x0004)
+            SetConsoleMode(handle, mode | 0x0004);
+        }
+
         // This method generates a 10-character progress bar based on percentage
         public static string GetProgressBar(int percentage)
         {
@@ -267,5 +287,25 @@ namespace injection
 
             return $"[{progress}{remaining}{resetColor}]";
         }
+
+        public string GetTheFirst1024Characters(string text) 
+        {
+            if (text.Length <= 1024) return text;
+            //find the last dot before 1024 characters to avoid cutting in the middle of a sentence
+            int cutIndex = text.Substring(0, 1024).LastIndexOf('.');
+            //fallback to the last space if no dot is found
+            if(cutIndex == -1) cutIndex = text.Substring(0, 1024).LastIndexOf(' ');
+            //fallback to 1024 if no space is found
+            if (cutIndex == -1) cutIndex = 1024;
+            if (cutIndex == -1 ) cutIndex = 1024; // If no space found, cut at 1024
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"\n[Warning] Text was longer than 1024 chars and truncated to {cutIndex} chars!");
+            Console.ResetColor();
+            Thread.Sleep(2000);
+
+            return text.Substring(0, cutIndex).Trim();
+        }
+        
     }
 }
