@@ -108,17 +108,22 @@ namespace injection
         {
             List<string> cycles = manager.generate_diminishing_cycles(splited_text_into_sentences);
 
+            // Calculate the focus ratio based on the expected time and actual time
+            double focus_ratio = 0.0;
+
             for (int i = 0; i < cycles.Count; i++)
             {
                 Console.Clear();
+
+                Stopwatch cycle_timer = Stopwatch.StartNew();
+
                 string totale_injection_time = manager.estimated_time();
                 string current_cycle_time = manager.calculate_current_cycle_time(cycles[i]);
 
                 int total_length = TextManager.input_text.Replace("\r\n", "").Length;
                 int current_lenght = cycles[i].Replace("\t", "").Replace("\r\n", "").Length;
                 double percentage = total_length > 0 ? 1 - ((double)current_lenght / total_length) : 0;
-                percentage *= 100;
-                
+                percentage *= 100;                
 
                 Console.WriteLine(
                     "\t|| " + "Total Injection Time:   " + totale_injection_time +
@@ -126,7 +131,8 @@ namespace injection
                     " || " + (int)percentage +
                     "% " + TextManager.GetProgressBar((int)percentage) +
                     " || " + Environment.NewLine + 
-                    "\t|| " + "Remainig Injectin time: " + manager.calculate_remaining_time(cycles[i]) + Environment.NewLine);
+                    "\t|| " + "Remainig Injectin time: " + manager.calculate_remaining_time(cycles[i]) + 
+                    " || " +  get_colored_focus_score((int)(focus_ratio * 100)) + Environment.NewLine);
 
                 manager.print_cycle_with_highlight(cycles[i]);
                 manager.speak_text(cycles[i]);
@@ -150,6 +156,18 @@ namespace injection
                     }
                     Console.Clear();
                 }
+                cycle_timer.Stop();
+                // Calculate the expected typing time based on the length of the longest word
+                double expected_typing_longest_word = manager.longest_word.Length * 0.45;
+                // Get the elapsed time in seconds
+                double actua_seconds = cycle_timer.Elapsed.TotalSeconds;
+                // Calculate the expected time based on the length of the cycle
+                double expected_seconds = cycles[i].Length * 0.076;
+                // Calculate the focus ratio (expected time / actual time)
+                focus_ratio = actua_seconds > 0 ? (expected_seconds + expected_typing_longest_word )/ actua_seconds : 0;                
+
+                if (focus_ratio > 1.0) focus_ratio = 1.0; // Cap the focus ratio at 1.0 (100%)
+
             }
 
             Console.Clear();
@@ -158,6 +176,24 @@ namespace injection
             return;
         }
 
+        public static string get_colored_focus_score(int score)
+        {
+            // ANSI Color Codes
+            string green = "\x1b[32m";
+            string yellow = "\x1b[33m";
+            string red = "\x1b[31m";
+            string reset = "\x1b[0m";
+
+            string chosenColor;
+
+            // Determine color based on score range
+            if (score >= 90) chosenColor = green;
+            else if (score >= 50) chosenColor = yellow;
+            else chosenColor = red;
+
+            // Return the formatted colored string
+            return $"Focus Score: {chosenColor}{score}%{reset}";
+        }
         private static void view()
         {
             Console.Clear();
