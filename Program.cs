@@ -18,7 +18,7 @@ namespace injection
     internal class Program
     {
         private static TextManager manager = new TextManager();
-
+        private static DataBaseManager dbm = new DataBaseManager();        
         static void Main(string[] args)
         {
             TextManager.EnableAnsiColors();
@@ -168,6 +168,7 @@ namespace injection
 
                 if (focus_ratio > 1.0) focus_ratio = 1.0; // Cap the focus ratio at 1.0 (100%)
 
+                dbm.save_focus_wordLog(test_word,focus_ratio);
             }
 
             Console.Clear();

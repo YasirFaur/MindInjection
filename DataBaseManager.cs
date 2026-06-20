@@ -36,7 +36,7 @@ namespace injection
             // Get only the first line of the text and trim spaces
             string first_line = input_text.Split('\n')[0].Trim();
             // If the first line is too long, cut it to 128 characters
-            if (first_line.Length > 128) first_line = first_line.Substring(0, 128);
+            if (first_line.Length > 128) first_line = first_line.Substring(0, 32);
 
             // Replace forbidden filename characters with an underscore
             string safe_name = Regex.Replace(first_line, @"[\\/:*?""<>|]", "_").Trim();
@@ -76,5 +76,38 @@ namespace injection
             // Search the folder for txt files, get their names, and return them as a list
             return Directory.GetFiles(_folderPath, "*.txt").Select(Path.GetFileName).ToList();
         }
+
+        public void save_focus_wordLog(string word, double focusScore)
+        {
+            try
+            {
+                // Get the first line of the input text
+                string firstLine = TextManager.input_text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)[0];
+
+                // Use the first 32 characters as the file name
+                string safeFileName = string.Concat(firstLine.Take(32)).Trim();
+                string filePath = $"{_folderPath}/{safeFileName}.csv";
+
+                // Get current date and time
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                // Prepare the text line for the CSV file
+                string logLine = $"{word},{timestamp},{focusScore:P0}{Environment.NewLine}";
+
+                // If the file does not exist, create it with headers
+                if (!File.Exists(filePath))
+                {
+                    File.WriteAllText(filePath, "Word,Timestamp,Focus Score" + Environment.NewLine);
+                }
+
+                // Add the new log line to the file
+                File.AppendAllText(filePath, logLine);
+            }
+            catch (Exception ex)
+            {
+                // Fail silently to keep the app running
+            }
+        }
     }
+
 }

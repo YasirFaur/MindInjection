@@ -116,7 +116,7 @@ namespace injection
                 }
 
             }
-            dbm.save_session(string.Join(Environment.NewLine, sentence_list));
+            dbm.save_session(string.Join(Environment.NewLine, sentence_list));  
             return sentence_list;
         }
 
