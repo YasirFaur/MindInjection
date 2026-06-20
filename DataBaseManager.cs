@@ -87,8 +87,8 @@ namespace injection
                 // Get current date and time
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-                // Prepare the text line for the CSV file
-                string logLine = $"{word},{timestamp},{focusScore:P0}{Environment.NewLine}";
+                // Multiplies the score by 100 and converts it to a whole number (e.g., 89)
+                string logLine = $"{word},{timestamp},{(int)(focusScore * 100)}{Environment.NewLine}";
 
                 // If the file does not exist, create it with headers
                 if (!File.Exists(filePath))
@@ -125,9 +125,9 @@ namespace injection
                     if (data[x] >= y && data[x] > 0)
                     {
                         // Set color ranges based on temperature values
-                        if (data[x] >= 80) Console.ForegroundColor = ConsoleColor.Red;
+                        if (data[x] >= 80) Console.ForegroundColor = ConsoleColor.Green;
                         else if (data[x] >= 60) Console.ForegroundColor = ConsoleColor.Yellow;
-                        else Console.ForegroundColor = ConsoleColor.Green;
+                        else Console.ForegroundColor = ConsoleColor.Red;
 
                         Console.Write("|"); // Draw the bar
                     }
@@ -147,6 +147,65 @@ namespace injection
                 Console.Write("...|");
             }
             Console.WriteLine(Environment.NewLine);
+        }
+
+        public int[] read_focus_scores()
+        {
+            var scoresList = new List<int>();
+            string filePath = Path.Combine(_folderPath, "focus score.csv");
+
+            if (!File.Exists(filePath)) return scoresList.ToArray();
+
+            try
+            {
+                using (var reader = new StreamReader(filePath))
+                {
+                    // Skip the header line (Word,Timestamp,Focus Score)
+                    reader.ReadLine();
+
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // Split by comma and get the 3rd column (index 2)
+                        string[] columns = line.Split(',');
+                        if (columns.Length >= 3 && int.TryParse(columns[2], out int score))
+                        {
+                            scoresList.Add(score);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fail silently
+            }
+
+            return scoresList.ToArray();
+        }
+
+        public string analyze_focus_trend(int[] scores)
+        {
+            if (scores == null || scores.Length < 2)
+                return "Not Enough Data";
+
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            int n = scores.Length;
+
+            for (int i = 0; i < n; i++)
+            {
+                sumX += i;            // Sequential time index
+                sumY += scores[i];     // Focus score value
+                sumXY += i * scores[i];
+                sumX2 += i * i;
+            }
+
+            // Calculate the Slope
+            double slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+            // Return the trend result as text
+            if (slope > 0.1) return "\t[ Your focus level is going up. ]";
+            if (slope < -0.1) return "\t[ Your focus level is going down! ]";
+            return "\t[ Your focus level is stable. ]";
         }
     }
 

@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Xml.Schema;
 using JetBrains.Annotations;
+using System.Drawing.Text;
 
 namespace injection
 {
@@ -40,8 +41,11 @@ namespace injection
 
             Console.ResetColor();
 
-            int[] focus = { 70, 60, 82, 66, 99, 100, 50, 40, 85 };
-            dbm.focus_score_chart(focus);
+            dbm.focus_score_chart(dbm.read_focus_scores());
+
+            colored_trend(dbm.read_focus_scores());
+                        
+
             manager.speak_text("Mind Injection");
             manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
             manager.speak_text("Created by Yasir Faur.");
@@ -109,6 +113,29 @@ namespace injection
                     }                    
                 }
             }
+        }
+
+        private static void colored_trend(int[] values)
+        {
+            string trend_message = dbm.analyze_focus_trend(values);
+            //Check the message and apply the correct color
+            if (trend_message.Contains("up"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else if (trend_message.Contains("down"))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+            }
+
+            // 3. Print the text and reset the color
+            Console.WriteLine(trend_message);
+            Console.ResetColor();
+
         }
 
         private static void inject(List<string> splited_text_into_sentences)
