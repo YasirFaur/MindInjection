@@ -29,16 +29,23 @@ namespace injection
 
             Console.WriteLine(Environment.NewLine);
             manager.print_ascii_art("   MindInjection");
-            manager.speak_text("Mind Injection");
+            
 
             Console.ForegroundColor = ConsoleColor.Green;
 
             Console.WriteLine(Environment.NewLine + "   Where Repetition Meets Focus, Mastery Becomes Inevitable.");
-            manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
-            Console.WriteLine("   Created by Yasir Faur.");
-            manager.speak_text("Created by Yasir Faur.");
+            
+            Console.WriteLine("   Created by Yasir Faur." + Environment.NewLine);
+            
 
             Console.ResetColor();
+
+            int[] focus = { 70, 60, 82, 66, 99, 100, 50, 40, 85 };
+            dbm.focus_score_chart(focus);
+            manager.speak_text("Mind Injection");
+            manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
+            manager.speak_text("Created by Yasir Faur.");
+
             Console.Clear();
 
             main_menu();

@@ -81,12 +81,8 @@ namespace injection
         {
             try
             {
-                // Get the first line of the input text
-                string firstLine = TextManager.input_text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)[0];
-
-                // Use the first 32 characters as the file name
-                string safeFileName = string.Concat(firstLine.Take(32)).Trim();
-                string filePath = $"{_folderPath}/{safeFileName}.csv";
+                // Define a fixed file name for all logs
+                string filePath = Path.Combine(_folderPath, "focus score.csv");
 
                 // Get current date and time
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -100,13 +96,57 @@ namespace injection
                     File.WriteAllText(filePath, "Word,Timestamp,Focus Score" + Environment.NewLine);
                 }
 
-                // Add the new log line to the file
+                // Add the new log line to the fixed file
                 File.AppendAllText(filePath, logLine);
             }
             catch (Exception ex)
             {
                 // Fail silently to keep the app running
             }
+        }
+
+        public void focus_score_chart(int[] data)
+        {
+            if (data == null || data.Length == 0) return;
+
+            // Find max value to scale the chart dynamically, or set a fixed max (e.g., 100)
+            int maxValue = 100;
+            int step = 5; // The Y-axis steps (100, 95, 90... 0)
+
+            // 1. Draw the chart from top to bottom
+            for (int y = maxValue; y >= 0; y -= step)
+            {
+                // Print Y-axis labels formatted to 2 digits
+                Console.Write($"{y:D3} ");
+
+                // Print bars for each data point
+                for (int x = 0; x < data.Length; x++)
+                {
+                    if (data[x] >= y && data[x] > 0)
+                    {
+                        // Set color ranges based on temperature values
+                        if (data[x] >= 80) Console.ForegroundColor = ConsoleColor.Red;
+                        else if (data[x] >= 60) Console.ForegroundColor = ConsoleColor.Yellow;
+                        else Console.ForegroundColor = ConsoleColor.Green;
+
+                        Console.Write("|"); // Draw the bar
+                    }
+                    else
+                    {
+                        Console.Write(" "); // Empty space
+                    }
+                }
+                Console.ResetColor();
+                Console.WriteLine();
+            }
+
+            // 2. Draw the X-axis line
+            Console.Write("000 ");
+            for (int x = 0; x < data.Length; x++)
+            {
+                Console.Write("...|");
+            }
+            Console.WriteLine(Environment.NewLine);
         }
     }
 
