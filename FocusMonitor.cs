@@ -33,7 +33,7 @@ namespace injection
         }
 
 
-        private static SpeechSynthesizer voice_notification = new SpeechSynthesizer();
+        public static SpeechSynthesizer voice_notification = new SpeechSynthesizer();
         static FocusMonitor()
         {
             voice_notification.SelectVoice("Microsoft Zira Desktop");

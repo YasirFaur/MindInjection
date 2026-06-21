@@ -109,42 +109,46 @@ namespace injection
         {
             if (data == null || data.Length == 0) return;
 
-            // Find max value to scale the chart dynamically, or set a fixed max (e.g., 100)
+            // Limit the chart width to the latest N elements to prevent text wrapping
+            const int MaxVisiblePoints = 64;
+            if (data.Length > MaxVisiblePoints)
+            {
+                // Skip the old points and take only the latest ones
+                data = data.Skip(data.Length - MaxVisiblePoints).ToArray();
+            }
+
             int maxValue = 100;
-            int step = 5; // The Y-axis steps (100, 95, 90... 0)
+            int step = 5;
 
             // 1. Draw the chart from top to bottom
             for (int y = maxValue; y >= 0; y -= step)
             {
-                // Print Y-axis labels formatted to 2 digits
                 Console.Write($"{y:D3} ");
 
-                // Print bars for each data point
                 for (int x = 0; x < data.Length; x++)
                 {
                     if (data[x] >= y && data[x] > 0)
                     {
-                        // Set color ranges based on temperature values
-                        if (data[x] >= 80) Console.ForegroundColor = ConsoleColor.Green;
+                        if (data[x] >= 90) Console.ForegroundColor = ConsoleColor.Green;
                         else if (data[x] >= 60) Console.ForegroundColor = ConsoleColor.Yellow;
                         else Console.ForegroundColor = ConsoleColor.Red;
 
-                        Console.Write("|"); // Draw the bar
+                        Console.Write("|");
+                        Console.ResetColor();
                     }
                     else
                     {
-                        Console.Write(" "); // Empty space
+                        Console.Write(" ");
                     }
                 }
-                Console.ResetColor();
                 Console.WriteLine();
             }
 
-            // 2. Draw the X-axis line
-            Console.Write("000 ");
+            // 2. Draw the X-axis line            
+            Console.Write("    ");
             for (int x = 0; x < data.Length; x++)
             {
-                Console.Write("...|");
+                Console.Write(x % 5 == 0 ? "+" : ".");
             }
             Console.WriteLine(Environment.NewLine);
         }
@@ -206,6 +210,65 @@ namespace injection
             if (slope > 0.1) return "\t[ Your focus level is going up. ]";
             if (slope < -0.1) return "\t[ Your focus level is going down! ]";
             return "\t[ Your focus level is stable. ]";
+        }
+
+        public double calculate_standard_deviation(int[] scores)
+        {
+            if (scores == null || scores.Length < 2) return 0.0;
+
+            double average = scores.Average();
+
+            // Sum of squared differences
+            double sumOfSquares = scores.Sum(score => Math.Pow(score - average, 2));
+
+            // Variance (for sample: n - 1)
+            double variance = sumOfSquares / (scores.Length - 1);
+
+            // Standard Deviation is the square root of variance
+            return Math.Sqrt(variance);
+        }
+
+        public string get_focus_behavior_analysis(int[] scores)
+        {
+            if (scores == null || scores.Length < 2) return "Not enough data.";
+
+            // 1. Calculate Slope (Linear Regression)
+            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            int n = scores.Length;
+            for (int i = 0; i < n; i++)
+            {
+                sumX += i; sumY += scores[i];
+                sumXY += i * scores[i]; sumX2 += i * i;
+            }
+            double slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+            // 2. Calculate Standard Deviation
+            double avg = scores.Average();
+            double sumSq = scores.Sum(s => Math.Pow(s - avg, 2));
+            double stdDev = Math.Sqrt(sumSq / (n - 1));
+
+            // 3. Smart Fusion Logic (Slope + StdDev)
+            // Case A: Improving Trend
+            if (slope > 0.1)
+            {
+                if (stdDev <= 16.0)
+                    return "\tYour focus is improving with a steady, strong rhythm. Keep going!";
+                else
+                    return "\tYour focus is going up, but with heavy jumps. Try to stay calm.";
+            }
+            // Case B: Decreasing Trend
+            if (slope < -0.1)
+            {
+                if (stdDev <= 16.0)
+                    return "\tYour focus is going down smoothly. You might need a good rest.";
+                else
+                    return "\tYour focus is dropping with sharp crashes. Fix your environment.";
+            }
+            // Case C: Stable Trend
+            if (stdDev <= 9.0)
+                return "\tYour focus is stable and highly controlled. Excellent consistency!";
+
+            return "\tYour focus has normal daily shifts, but your overall level is safe.";
         }
     }
 

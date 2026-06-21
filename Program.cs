@@ -24,7 +24,7 @@ namespace injection
         {
             TextManager.EnableAnsiColors();
 
-            Console.Title = "MindInjection - Focus & Mastery System";
+            Console.Title = "MindInjection - Focus & Mastery System ( :!: DEMO :!: )";
             FocusMonitor.MaximizeAndLockConsole();
             FocusMonitor.StartMonitoring();
 
@@ -41,14 +41,23 @@ namespace injection
 
             Console.ResetColor();
 
-            dbm.focus_score_chart(dbm.read_focus_scores());
+            int[] focus_scors = dbm.read_focus_scores();
 
-            colored_trend(dbm.read_focus_scores());
-                        
+            dbm.focus_score_chart(focus_scors);
+
+            colored_trend(focus_scors);
+
+            string advice = get_stability_feedback(dbm.calculate_standard_deviation(focus_scors));
+            Console.WriteLine(advice);
+
+            string behaviors_analysis = dbm.get_focus_behavior_analysis(focus_scors);
+            Console.WriteLine(behaviors_analysis);
 
             manager.speak_text("Mind Injection");
             manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
             manager.speak_text("Created by Yasir Faur.");
+            manager.speak_text(advice);
+            manager.speak_text(behaviors_analysis);
 
             Console.Clear();
 
@@ -138,10 +147,29 @@ namespace injection
 
         }
 
+        public static string get_stability_feedback(double stdDev)
+        {
+            // Excellent Stability (Under 9)
+            if (stdDev < 9.0)
+            {
+                return "\tYour focus is very stable. Keep up this great, balanced routine!";
+            }
+
+            // Normal Waves (From 9 up to 16)
+            if (stdDev <= 16.0)
+            {
+                return "\tYour focus has slight ups and downs. This is natural, just stay consistent.";
+            }
+
+            // High Variance (Above 16)
+            return "\tYour focus jumps up and down heavily. Try to reduce distractions around you.";
+        }
+
         private static void inject(List<string> splited_text_into_sentences)
         {
             List<string> cycles = manager.generate_diminishing_cycles(splited_text_into_sentences);
-
+            // Store scores of each repetition in the current session
+            List<int> session_scores = new List<int>();
             // Calculate the focus ratio based on the expected time and actual time
             double focus_ratio = 0.0;
 
@@ -202,8 +230,31 @@ namespace injection
 
                 if (focus_ratio > 1.0) focus_ratio = 1.0; // Cap the focus ratio at 1.0 (100%)
 
+                
+                // Convert ratio to percentage and add to session list
+                int current_score = (int)(focus_ratio * 100);
+                session_scores.Add(current_score);
+
                 dbm.save_focus_wordLog(test_word,focus_ratio);
             }
+
+            // Convert list to array for statistical calculations
+            int[] scores_array = session_scores.ToArray();
+
+            if (scores_array.Length >= 2)
+            {                               
+                string focus_analyasis = dbm.analyze_focus_trend(scores_array);
+                Console.WriteLine(focus_analyasis);
+                string behavior_report = dbm.get_focus_behavior_analysis(scores_array);                
+                Console.WriteLine(behavior_report);
+
+                FocusMonitor.voice_notification.Speak(focus_analyasis + behavior_report);                
+            }
+            else
+            {
+                // Not enough reps to calculate statistics
+                Thread.Sleep(2000);
+            }            
 
             Console.Clear();
             Console.WriteLine("\n[Process Finished. Returning to Main Menu...]");
@@ -264,8 +315,8 @@ namespace injection
                 manager.print_ascii_art("      2 - View");
                 manager.print_ascii_art("      3 - Update");
                 manager.print_ascii_art("      4 - Delete");
-                manager.print_ascii_art("   Select an option (1-4): ");
-
+                //manager.print_ascii_art("   Select an option (1-4): ");
+                Console.WriteLine(Environment.NewLine + "   Select an option (1-4): ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
