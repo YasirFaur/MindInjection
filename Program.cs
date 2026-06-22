@@ -22,6 +22,8 @@ namespace injection
         private static DataBaseManager dbm = new DataBaseManager();        
         static void Main(string[] args)
         {
+            EnableAutoStart();
+
             TextManager.EnableAnsiColors();
 
             Console.Title = "MindInjection - Focus & Mastery System ( :!: DEMO :!: )";
@@ -416,6 +418,46 @@ namespace injection
                     case "4":
                         delete();
                         break;
+                }
+            }
+        }
+
+        private static void EnableAutoStart()
+        {
+            // Get the path of the Windows Startup folder for the current user
+            string startupFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                @"Microsoft\Windows\Start Menu\Programs\Startup"
+            );
+
+            // Set the shortcut file name and get the current app path
+            string shortcutPath = Path.Combine(startupFolder, "MindInjection.lnk");
+            string appPath = Process.GetCurrentProcess().MainModule.FileName;
+
+            // Check if the startup shortcut does not exist yet
+            if (!File.Exists(shortcutPath))
+            {
+                try
+                {
+                    // Create a Windows Script Host shell object to make a shortcut
+                    Type t = Type.GetTypeFromProgID("WScript.Shell");
+                    dynamic shell = Activator.CreateInstance(t);
+                    var shortcut = shell.CreateShortcut(shortcutPath);
+
+                    // Configure the shortcut path, working directory, and description
+                    shortcut.TargetPath = appPath;
+                    shortcut.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    shortcut.Description = "MindInjection Auto Start";
+
+                    // Save the shortcut file to the Startup folder
+                    shortcut.Save();
+
+                    Console.WriteLine("Auto-start enabled successfully!");
+                }
+                catch (Exception ex)
+                {
+                    // Show an error message if something goes wrong
+                    Console.WriteLine($"Could not configure auto-start: {ex.Message}");
                 }
             }
         }
