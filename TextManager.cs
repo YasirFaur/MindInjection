@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using WenceyWang.FIGlet;
 namespace injection
@@ -165,35 +166,7 @@ namespace injection
             }
 
 
-        }
-
-        //this method finds the longest word in a given setence, ignore puntuation
-        public string find_longest_word(string sentence)
-        {
-            if (string.IsNullOrEmpty(sentence)) return string.Empty;
-
-            //remove punctuation markes to get pure words
-            char[] punctuation = { '.', ',', '!', '?', ';', ':', '(', ')', '"' };
-            string clean_sentence = sentence.Trim();
-            foreach (char p in punctuation)
-            {
-                clean_sentence = clean_sentence.Replace(p.ToString(), "");
-            }
-
-            //split sentence into words
-            string[] words = clean_sentence.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            string longest_word = string.Empty;
-
-            //loop to find the word with maximum length
-            foreach (string word in words)
-            {
-                if (word.Length > longest_word.Length)
-                {
-                    longest_word = word;
-                }
-            }
-            return longest_word;
-        }
+        }                
 
         //this method converts text to speech completely offline
 
@@ -317,6 +290,100 @@ namespace injection
 
             return text.Substring(0, cutIndex).Trim();
         }
-        
+
+        public void cumulative_review_session(string full_text)
+        {
+            if (string.IsNullOrWhiteSpace(full_text)) return;
+
+            // 1. Split text into sentences
+            string[] sentences = full_text.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+            string accumulatedText = "";
+
+            for (int i = 0; i < sentences.Length; i++)
+            {
+                string currentSentence = sentences[i].Trim();
+                if (string.IsNullOrWhiteSpace(currentSentence)) continue;
+
+                // Build the cumulative layer
+                accumulatedText = string.IsNullOrEmpty(accumulatedText)
+                    ? currentSentence
+                    : accumulatedText + "." + Environment.NewLine + currentSentence;
+
+                // 2 & 7. Display the current accumulated text layer
+                Console.Clear();
+                Console.WriteLine(Environment.NewLine + $"--- Layer {i + 1} of {sentences.Length} ---\n");                
+                Console.WriteLine(accumulatedText + ".");                
+
+                // 3 & 7. Call TTS Engine to read the newly formed text block
+                speak_text(accumulatedText);
+
+                // 4. Select longest word from the *current* sentence only
+                string longestWord = find_longest_word(currentSentence);
+
+                if (!string.IsNullOrEmpty(longestWord))
+                {
+                    // 5. Ask user to type it to confirm attention
+                    Console.WriteLine(Environment.NewLine);                    
+                    print_ascii_art(longestWord);
+                    speak_text("Type: " + longestWord);                    
+                    string userInput = Console.ReadLine()?.Trim();                    
+
+                    // 6. Loop until correct
+                    while (!string.Equals(userInput, longestWord, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        print_ascii_art(longestWord);
+                        speak_text("Type: " + longestWord);
+                        Console.ResetColor();
+                        userInput = Console.ReadLine()?.Trim();
+                    }                    
+                }
+            }
+
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Cumulative Spaced-Review Session Completed Successfully!");
+            Console.ResetColor();            
+        }
+
+        // Helper method to extract the longest pure word from a sentence
+        private string find_longest_word(string sentence)
+        {
+            // Remove punctuation to get pure words
+            string cleanSentence = Regex.Replace(sentence, @"[^\w\s]", "");
+            string[] words = cleanSentence.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string longest = "";
+            foreach (string word in words)
+            {
+                if (word.Length > longest.Length)
+                {
+                    longest = word;
+                }
+            }
+            return longest;
+        }
+
+        public void remove_completed_review(string fileName, string targetDate)
+        {
+            string _folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database");
+            string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
+            if (!File.Exists(schedule_file)) return;            
+            var linesToKeep = File.ReadAllLines(schedule_file)
+                .Where(line => {
+                    string[] parts = line.Split(',');
+                    if (parts.Length == 2)
+                    {
+                        string name = parts[0].Trim();
+                        string date = parts[1].Trim();
+                        
+                        return !(string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase) && date == targetDate);
+                    }
+                    return true;
+                }).ToList();
+
+            File.WriteAllLines(schedule_file, linesToKeep);
+        }
+
     }
 }

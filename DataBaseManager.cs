@@ -53,23 +53,24 @@ namespace injection
 
         public void schedule_file_review(string file_name)
         {
-            if (string.IsNullOrWhiteSpace(file_name)) return;
+            if (string.IsNullOrWhiteSpace(file_name)) return;           
+            if (!file_name.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+            {
+                file_name += ".txt";
+            }
 
             string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
-            DateTime now = DateTime.Now;
+            DateTime today = DateTime.Today;
 
-            // Generate the 3 spaced repetition rows (24h, 7d, 30d)
             string[] review_dates = new string[]
             {
-                $"{file_name},{now.AddDays(1):yyyy-MM-dd}",
-                $"{file_name},{now.AddDays(7):yyyy-MM-dd}",
-                $"{file_name},{now.AddDays(30):yyyy-MM-dd}"
+                $"{file_name},{today.AddDays(1):yyyy-MM-dd}",
+                $"{file_name},{today.AddDays(7):yyyy-MM-dd}",
+                $"{file_name},{today.AddDays(30):yyyy-MM-dd}"
             };
 
-            // Append safely to the schedule file
             File.AppendAllLines(schedule_file, review_dates);
         }
-
 
         // Method to read and load a saved session file
         public string load_session(string file_name)

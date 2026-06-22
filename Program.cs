@@ -283,7 +283,90 @@ namespace injection
         private static void view()
         {
             Console.Clear();
-            Console.WriteLine("View option selected.");
+            Console.WriteLine("--- Today's Due Reviews ---\n");
+            // Get the application folder path and add the database directory name
+            string _folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database");
+            string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
+
+            if (!File.Exists(schedule_file))
+            {
+                Console.WriteLine("No review schedule file found.");
+                Console.WriteLine("\nPress any key to return to Main Menu...");
+                Console.ReadKey();
+                return;
+            }
+
+            string[] lines = File.ReadAllLines(schedule_file);
+            string todayStr = DateTime.Today.ToString("yyyy-MM-dd");
+
+            // Dictionary to map the display index to the actual file name
+            Dictionary<int, string> fileMapping = new Dictionary<int, string>();
+            int displayIndex = 1;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(lines[i])) continue;
+
+                string[] parts = lines[i].Split(',');
+                if (parts.Length == 2)
+                {
+                    string fileName = parts[0].Trim();
+                    string reviewDate = parts[1].Trim();
+
+                    if (string.Compare(reviewDate, todayStr) <= 0)
+                    {
+                        Console.WriteLine($"{displayIndex}. {fileName}");
+                        fileMapping.Add(displayIndex, fileName);
+                        displayIndex++;
+                    }
+                }
+            }
+
+            if (fileMapping.Count == 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Great job! No reviews scheduled for today.");
+                Console.ResetColor();
+                Console.WriteLine("\nPress any key to return to Main Menu...");
+                Console.ReadKey();
+                return;
+            }
+
+            // Handle user selection
+            Console.Write("\nEnter file number to start review (or 0 to cancel): ");
+            if (int.TryParse(Console.ReadLine(), out int choice) && fileMapping.ContainsKey(choice))
+            {
+                string targetFile = fileMapping[choice];
+                string fullPath = Path.Combine(_folderPath, targetFile);
+
+                if (File.Exists(fullPath))
+                {
+                    string fileContent = File.ReadAllText(fullPath);
+
+                    // Text is ready for injection or viewing
+                    Console.Clear();
+                    Console.WriteLine($"--- Content of {targetFile} ---\n");
+
+                    manager.cumulative_review_session(fileContent);
+
+                    manager.remove_completed_review(targetFile, todayStr);
+
+                    Console.WriteLine("\n--------------------------------");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Error: File '{targetFile}' not found in database folder.");
+                    Console.ResetColor();
+                }
+            }
+            else if (choice != 0)
+            {
+                Console.WriteLine("Invalid selection.");
+            }
+
+
+
             Console.WriteLine("\nPress any key to return to Main Menu...");
             Console.ReadKey();
         }
