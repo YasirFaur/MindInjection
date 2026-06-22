@@ -30,22 +30,46 @@ namespace injection
         // Method to save a text session into a file
         public void save_session(string input_text)
         {
-            // Stop the method if the input text is empty
             if (string.IsNullOrWhiteSpace(input_text)) return;
 
-            // Get only the first line of the text and trim spaces
             string first_line = input_text.Split('\n')[0].Trim();
-            // If the first line is too long, cut it to 128 characters
             if (first_line.Length > 128) first_line = first_line.Substring(0, 32);
 
-            // Replace forbidden filename characters with an underscore
             string safe_name = Regex.Replace(first_line, @"[\\/:*?""<>|]", "_").Trim();
-            // Combine the folder path and the safe name with a .txt extension
             string file_path = Path.Combine(_folderPath, $"{safe_name}.txt");
 
-            // Write and save the full text into the file
+            // Check if a file with the same name already exists
+            if (File.Exists(file_path))
+            {
+                // Append a unique timestamp to prevent overwriting
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                file_path = Path.Combine(_folderPath, $"{safe_name}_{timestamp}.txt");
+            }
+
             File.WriteAllText(file_path, input_text);
+
+            schedule_file_review(safe_name);
         }
+
+        public void schedule_file_review(string file_name)
+        {
+            if (string.IsNullOrWhiteSpace(file_name)) return;
+
+            string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
+            DateTime now = DateTime.Now;
+
+            // Generate the 3 spaced repetition rows (24h, 7d, 30d)
+            string[] review_dates = new string[]
+            {
+                $"{file_name},{now.AddDays(1):yyyy-MM-dd}",
+                $"{file_name},{now.AddDays(7):yyyy-MM-dd}",
+                $"{file_name},{now.AddDays(30):yyyy-MM-dd}"
+            };
+
+            // Append safely to the schedule file
+            File.AppendAllLines(schedule_file, review_dates);
+        }
+
 
         // Method to read and load a saved session file
         public string load_session(string file_name)
