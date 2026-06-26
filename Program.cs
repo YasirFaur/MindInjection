@@ -55,11 +55,11 @@ namespace injection
             string behaviors_analysis = dbm.get_focus_behavior_analysis(focus_scors);
             Console.WriteLine(behaviors_analysis);
 
-            /*manager.speak_text("Mind Injection");
+            manager.speak_text("Mind Injection");
             manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
             manager.speak_text("Created by Yasir Faur.");
             manager.speak_text(advice);
-            manager.speak_text(behaviors_analysis);*/
+            manager.speak_text(behaviors_analysis);
 
             Console.Clear();
 

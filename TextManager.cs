@@ -315,7 +315,8 @@ namespace injection
                 int layers_count = sentences.Length;
                 int progress_percentage = (int)((double)current_layer / layers_count * 100);
                 Console.WriteLine(Environment.NewLine + 
-                                    $"--- Layer {current_layer} of {layers_count} ---" + 
+                                    $"--- Layer {current_layer} of {layers_count} --- " + 
+                                    progress_percentage + "% "+ 
                                     GetProgressBar(progress_percentage ) +
                                     Environment.NewLine);                
                 Console.WriteLine(accumulatedText + ".");                
