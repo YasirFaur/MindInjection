@@ -311,7 +311,13 @@ namespace injection
 
                 // 2 & 7. Display the current accumulated text layer
                 Console.Clear();
-                Console.WriteLine(Environment.NewLine + $"--- Layer {i + 1} of {sentences.Length} ---\n");                
+                int current_layer = i + 1;
+                int layers_count = sentences.Length;
+                int progress_percentage = (int)((double)current_layer / layers_count * 100);
+                Console.WriteLine(Environment.NewLine + 
+                                    $"--- Layer {current_layer} of {layers_count} ---" + 
+                                    GetProgressBar(progress_percentage ) +
+                                    Environment.NewLine);                
                 Console.WriteLine(accumulatedText + ".");                
 
                 // 3 & 7. Call TTS Engine to read the newly formed text block
@@ -323,17 +329,18 @@ namespace injection
                 if (!string.IsNullOrEmpty(longestWord))
                 {
                     // 5. Ask user to type it to confirm attention
-                    Console.WriteLine(Environment.NewLine);                    
+                    Console.WriteLine(Environment.NewLine + "Type: ");                    
                     print_ascii_art(longestWord);
-                    speak_text("Type: " + longestWord);                    
+                    speak_text(longestWord);                    
                     string userInput = Console.ReadLine()?.Trim();                    
 
                     // 6. Loop until correct
                     while (!string.Equals(userInput, longestWord, StringComparison.OrdinalIgnoreCase))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Environment.NewLine + "Type: ");
                         print_ascii_art(longestWord);
-                        speak_text("Type: " + longestWord);
+                        speak_text(longestWord);
                         Console.ResetColor();
                         userInput = Console.ReadLine()?.Trim();
                     }                    
@@ -368,21 +375,34 @@ namespace injection
         {
             string _folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database");
             string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
-            if (!File.Exists(schedule_file)) return;            
-            var linesToKeep = File.ReadAllLines(schedule_file)
-                .Where(line => {
-                    string[] parts = line.Split(',');
-                    if (parts.Length == 2)
-                    {
-                        string name = parts[0].Trim();
-                        string date = parts[1].Trim();
-                        
-                        return !(string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase) && date == targetDate);
-                    }
-                    return true;
-                }).ToList();
+            if (!File.Exists(schedule_file)) return;
 
-            File.WriteAllLines(schedule_file, linesToKeep);
+            // Create a temporary list to hold the clean lines
+            var lines_to_keep = new List<string>();
+
+            // Process the file line by line
+            foreach (var line in File.ReadAllLines(schedule_file))
+            {
+                string[] parts = line.Split(',');
+                if (parts.Length == 2)
+                {
+                    string name = parts[0].Trim();
+                    string date = parts[1].Trim();
+
+                    // If this is the completed review line, skip it (delete it)
+                    if (string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase) 
+                        && date == targetDate)
+                    {
+                        continue;
+                    }
+                }
+
+                // Add safe and remaining lines to the list
+                lines_to_keep.Add(line);
+            }
+
+            // Rewrite the file with the remaining lines only
+            File.WriteAllLines(schedule_file, lines_to_keep);
         }
 
     }

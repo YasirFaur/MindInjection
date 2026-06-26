@@ -55,11 +55,11 @@ namespace injection
             string behaviors_analysis = dbm.get_focus_behavior_analysis(focus_scors);
             Console.WriteLine(behaviors_analysis);
 
-            manager.speak_text("Mind Injection");
+            /*manager.speak_text("Mind Injection");
             manager.speak_text("Where Repetition Meets Focus, Mastery Becomes Inevitable.");
             manager.speak_text("Created by Yasir Faur.");
             manager.speak_text(advice);
-            manager.speak_text(behaviors_analysis);
+            manager.speak_text(behaviors_analysis);*/
 
             Console.Clear();
 
@@ -190,6 +190,7 @@ namespace injection
                 percentage *= 100;                
 
                 Console.WriteLine(
+                    Environment.NewLine +
                     "\t|| " + "Total Injection Time:   " + totale_injection_time +
                     " || " + "Current Cycle Time: " + current_cycle_time +
                     " || " + (int)percentage +
@@ -205,11 +206,12 @@ namespace injection
 
                 while (true)
                 {
+                    Console.WriteLine(Environment.NewLine + "Type: ");
                     manager.print_ascii_art(test_word);
                     Console.WriteLine(Environment.NewLine);
 
                     TextManager.set_speaking_status(true);
-                    manager.speak_text_async("type! " + manager.longest_word);
+                    manager.speak_text_async(manager.longest_word);
 
                     string user_input = Console.ReadLine()?.Trim().ToLower();
                     TextManager.set_speaking_status(false);
@@ -250,7 +252,7 @@ namespace injection
                 string behavior_report = dbm.get_focus_behavior_analysis(scores_array);                
                 Console.WriteLine(behavior_report);
 
-                FocusMonitor.voice_notification.Speak(focus_analyasis + behavior_report);                
+                FocusMonitor.voice_notification.Speak(behavior_report);                
             }
             else
             {
@@ -282,14 +284,22 @@ namespace injection
             // Return the formatted colored string
             return $"Focus Score: {chosenColor}{score}%{reset}";
         }
+
         private static void view()
         {
+            // Clear the screen to start with a clean page
             Console.Clear();
-            Console.WriteLine("--- Today's Due Reviews ---\n");
-            // Get the application folder path and add the database directory name
+
+            // Show the title of this page to the user
+            Console.WriteLine(Environment.NewLine + "--- Due Reviews (Today & Past) ---\n");
+
+            // Find the main folder path where the database is located
             string _folderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database");
+
+            // Find the exact path of the text file that holds the schedule
             string schedule_file = Path.Combine(_folderPath, "review_schedule.csv");
 
+            // If the schedule file does not exist, tell the user and stop
             if (!File.Exists(schedule_file))
             {
                 Console.WriteLine("No review schedule file found.");
@@ -298,33 +308,53 @@ namespace injection
                 return;
             }
 
+            // Read all the text lines inside the schedule file
             string[] lines = File.ReadAllLines(schedule_file);
-            string todayStr = DateTime.Today.ToString("yyyy-MM-dd");
 
-            // Dictionary to map the display index to the actual file name
-            Dictionary<int, string> fileMapping = new Dictionary<int, string>();
+            // Get today's date in a clean year-month-day format
+            string str_today = DateTime.Today.ToString("yyyy-MM-dd");
+
+            // Create a dictionary list to connect numbers (1, 2, 3) to file names and dates
+            Dictionary<int, Tuple<string, string>> file_mapping = new Dictionary<int, Tuple<string, string>>();
+
+            // Start counting the menu numbers from 1
             int displayIndex = 1;
 
+            // Look at each line in the file one by one
             for (int i = 0; i < lines.Length; i++)
             {
+                // Skip the line if it is empty or has only spaces
                 if (string.IsNullOrWhiteSpace(lines[i])) continue;
 
+                // Split the line into two parts using the comma sign
                 string[] parts = lines[i].Split(',');
+
+                // Check if the line has exactly two valid parts (name and date)
                 if (parts.Length == 2)
                 {
+                    // Get the file name and clean up any extra spaces
                     string fileName = parts[0].Trim();
+
+                    // Get the schedule date and clean up any extra spaces
                     string reviewDate = parts[1].Trim();
 
-                    if (string.Compare(reviewDate, todayStr) <= 0)
+                    // Check if the schedule date is today or from the past
+                    if (string.Compare(reviewDate, str_today) <= 0)
                     {
-                        Console.WriteLine($"{displayIndex}. {fileName}");
-                        fileMapping.Add(displayIndex, fileName);
+                        // Print the file number, name, and its due date on the screen
+                        Console.WriteLine($"{displayIndex}. {fileName} (Due: {reviewDate})");
+
+                        // Save the number, file name, and date into our dictionary list
+                        file_mapping.Add(displayIndex, Tuple.Create(fileName, reviewDate));
+
+                        // Increase the menu number by 1 for the next item
                         displayIndex++;
                     }
                 }
             }
 
-            if (fileMapping.Count == 0)
+            // If no files match today or the past, show a success message and stop
+            if (file_mapping.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Great job! No reviews scheduled for today.");
@@ -334,41 +364,66 @@ namespace injection
                 return;
             }
 
-            // Handle user selection
+            // Ask the user to choose a number from the menu
             Console.Write("\nEnter file number to start review (or 0 to cancel): ");
-            if (int.TryParse(Console.ReadLine(), out int choice) && fileMapping.ContainsKey(choice))
-            {
-                string targetFile = fileMapping[choice];
-                string fullPath = Path.Combine(_folderPath, targetFile);
 
+            // Read user input, make sure it is a real number, and check if it is in our list
+            if (int.TryParse(Console.ReadLine(), out int choice) && file_mapping.ContainsKey(choice))
+            {
+                // Get the real file name that matches the user's chosen number
+                string target_file = file_mapping[choice].Item1;
+
+                // Get the original due date that matches the user's chosen number
+                string actual_due_date = file_mapping[choice].Item2;
+
+                // Create the full path to locate the chosen file inside the folder
+                string fullPath = Path.Combine(_folderPath, target_file);
+
+                // Check if the text file actually exists in the folder
                 if (File.Exists(fullPath))
                 {
-                    string fileContent = File.ReadAllText(fullPath);
+                    // Read all the text content inside that file
+                    string file_content = File.ReadAllText(fullPath);
 
-                    // Text is ready for injection or viewing
+                    // Clear the screen to show the file content alone
                     Console.Clear();
-                    Console.WriteLine($"--- Content of {targetFile} ---\n");
+                    Console.WriteLine($"--- Content of: '{target_file}' ---\n");
 
-                    manager.cumulative_review_session(fileContent);
+                    // Show the text content wrapped in quotation marks
+                    Console.WriteLine('"' + file_content + '"');
 
-                    manager.remove_completed_review(targetFile, todayStr);
+                    // Change the text color to blue for the next instruction
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine(Environment.NewLine + "Press any key to start the review session...");
 
+                    // Wait for the user to press a key without showing the typed letter
+                    Console.ReadKey(true);
+                    Console.ResetColor();
+
+                    // Start the learning session using the file content
+                    manager.cumulative_review_session(file_content);
+
+                    // Delete this specific review entry from the schedule file using its real date
+                    manager.remove_completed_review(target_file, actual_due_date);
+
+                    // Print a line to show the end of the session
                     Console.WriteLine("\n--------------------------------");
                 }
                 else
                 {
+                    // Change color to red and show an error if the file is missing
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Error: File '{targetFile}' not found in database folder.");
+                    Console.WriteLine($"Error: File '{target_file}' not found in database folder.");
                     Console.ResetColor();
                 }
             }
+            // If the user did not choose 0 and typed a wrong number, show an error
             else if (choice != 0)
             {
                 Console.WriteLine("Invalid selection.");
             }
 
-
-
+            // Ask the user to press any key to go back to the home screen
             Console.WriteLine("\nPress any key to return to Main Menu...");
             Console.ReadKey();
         }
@@ -425,24 +480,24 @@ namespace injection
         private static void EnableAutoStart()
         {
             // Get the path of the Windows Startup folder for the current user
-            string startupFolder = Path.Combine(
+            string startup_folder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 @"Microsoft\Windows\Start Menu\Programs\Startup"
             );
 
             // Set the shortcut file name and get the current app path
-            string shortcutPath = Path.Combine(startupFolder, "MindInjection.lnk");
+            string shortcut_path = Path.Combine(startup_folder, "MindInjection.lnk");
             string appPath = Process.GetCurrentProcess().MainModule.FileName;
 
             // Check if the startup shortcut does not exist yet
-            if (!File.Exists(shortcutPath))
+            if (!File.Exists(shortcut_path))
             {
                 try
                 {
                     // Create a Windows Script Host shell object to make a shortcut
                     Type t = Type.GetTypeFromProgID("WScript.Shell");
                     dynamic shell = Activator.CreateInstance(t);
-                    var shortcut = shell.CreateShortcut(shortcutPath);
+                    var shortcut = shell.CreateShortcut(shortcut_path);
 
                     // Configure the shortcut path, working directory, and description
                     shortcut.TargetPath = appPath;
