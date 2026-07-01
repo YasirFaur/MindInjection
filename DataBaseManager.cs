@@ -148,7 +148,7 @@ namespace injection
             // 1. Draw the chart from top to bottom
             for (int y = maxValue; y >= 0; y -= step)
             {
-                Console.Write($"{y:D3} ");
+                Console.Write($"\t{y:D3} ");
 
                 for (int x = 0; x < data.Length; x++)
                 {
@@ -170,7 +170,7 @@ namespace injection
             }
 
             // 2. Draw the X-axis line            
-            Console.Write("    ");
+            Console.Write("\t    ");
             for (int x = 0; x < data.Length; x++)
             {
                 Console.Write(x % 5 == 0 ? "+" : ".");
