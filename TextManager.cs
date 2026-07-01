@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using WenceyWang.FIGlet;
+
 namespace injection
 {
     public class TextManager
@@ -98,26 +99,25 @@ namespace injection
         //each sentence is separated by dot (.)
         public List<string> split_text_into_sentences()
         {
-            //creat an empty list to store our sentences
             List<string> sentence_list = new List<string>();
 
-            //split the text whenever there is a dot
-            string[] raw_sentences = input_text.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            // Split only when a dot is followed by a space, newline, or end of text
+            // Split the text using Regex, then filter out empty lines immediately
+            string[] raw_sentences = Regex.Split(input_text, @"\.(?=\s|$)")
+                                          .Where(s => !string.IsNullOrWhiteSpace(s))
+                                          .ToArray();
 
-            //loop through each raw sentence to clean it
             foreach (string sentence in raw_sentences)
             {
-                //trim standard spaces, newlines, and hidden web characters like NBSP
                 string clean_sentence = sentence.Trim(' ', '\r', '\n', '\t', '\u00a0');
 
                 if (!string.IsNullOrEmpty(clean_sentence))
                 {
-                    //add the dot back safly
                     sentence_list.Add(clean_sentence + ".");
                 }
-
             }
-            dbm.save_session(string.Join(Environment.NewLine, sentence_list));  
+
+            dbm.save_session(string.Join(Environment.NewLine, sentence_list));
             return sentence_list;
         }
 
